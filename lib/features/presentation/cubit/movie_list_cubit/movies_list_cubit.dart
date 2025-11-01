@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import '../../../data/models/movie_model.dart';
 import '../../../data/repository/movie_repository.dart';
 import '../../../../core/network/api_error_handler.dart';
@@ -45,6 +46,22 @@ class MoviesListCubit extends Cubit<MoviesListState> {
       emit(MoviesListLoaded(movies: _movies, hasMore: _hasMore));
     } catch (e) {
       final error = ApiErrorHandler.handle(e);
+      
+      // Send error to Sentry (safe to call even if Sentry is not initialized)
+      try {
+        await Sentry.captureException(
+          e,
+          hint: Hint.withMap({
+            'errorMessage': error.message,
+            'action': 'fetchMovies',
+            'loadMore': loadMore.toString(),
+            'currentPage': _currentPage.toString(),
+          }),
+        );
+      } catch (_) {
+        // Ignore Sentry errors to not interrupt error handling
+      }
+      
       if (isClosed) return;
       emit(MoviesListError(message: error.message!));
     }

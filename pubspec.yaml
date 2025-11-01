@@ -40,6 +40,9 @@ dependencies:
   # Shared Preferences (for theme storage)
   shared_preferences: ^2.3.4
 
+  # Error Tracking
+  sentry_flutter: ^8.9.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

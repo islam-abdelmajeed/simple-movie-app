@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import '../../../core/routes/routes.dart';
 import '../../../core/theme/theme_manager.dart';
 import '../cubit/movie_list_cubit/movies_list_cubit.dart';
@@ -120,7 +123,16 @@ class _MoviesListScreenState extends State<MoviesListScreen> {
           final movie = movies[index];
           return MovieCard(
             movie: movie,
-            onTap: () {
+            onTap: () async {
+              await Sentry.captureMessage(
+                'Movie details screen Message',
+                hint: Hint.withMap({'index': index, 'movieId': movie.id, 'movieTitle': movie.title}),
+              );
+              log('Error in movie details screen Exception');
+              await Sentry.captureException(
+                Exception('Error in movie details screen Exception'),
+                hint: Hint.withMap({'index': index, 'movieId': movie.id, 'movieTitle': movie.title}),
+              );
               Navigator.pushNamed(context, Routes.movieDetailsScreen, arguments: movie);
             },
           );
